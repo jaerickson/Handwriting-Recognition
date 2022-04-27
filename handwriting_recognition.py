@@ -1,4 +1,3 @@
-# Imports
 from os.path import exists
 import keras as keras
 import pandas as pd
@@ -12,7 +11,6 @@ import tensorflow as tf
 # Read answers.csv into a pandas dataframe. It should have a length of 47703.
 # answers_raw_data = pd.read_csv('answers.csv')
 answers_raw_data = pd.read_csv('answers.csv', nrows=1000)
-print(len(answers_raw_data))
 
 # Milestone 2:
 # Remove the two entries that don’t have images. Should now have a length of 2 less
@@ -25,7 +23,6 @@ for _, x in file_list:
     if not file_exists:
         missing_files += [fileName]
 answers_cleaned = answers_raw_data[~answers_raw_data["BallotID"].isin(missing_files)]
-print(len(answers_cleaned))
 
 # Milestone 3:
 # Read all the images into a single, three-dimensional numpy array (img_array).
@@ -47,9 +44,14 @@ trainSetX, testSetX, trainSetY, testSetY = sk_model.train_test_split(img_array, 
                                                                      test_size=0.2, train_size=0.8)
 trainSetX, validationSetX, trainSetY, validationSetY = sk_model.train_test_split(trainSetX, trainSetY,
                                                                                  test_size=0.2, train_size=0.8)
+
 # Milestone 6 & 7
 model = keras.models.Sequential([
-    keras.layers.Flatten(),
+    keras.layers.Conv2D(32, 11, activation='sigmoid', input_shape=(53, 358, 1)),
+    keras.layers.MaxPooling2D(1),
+    keras.layers.Conv2D(32, 11, activation='sigmoid', input_shape=(53, 358, 1)),
+    keras.layers.MaxPooling2D(1),
+    keras.layers.Flatten(input_shape=[53, 358]),
     keras.Input(shape=(53, 358)),
     keras.layers.Dense(32, activation='sigmoid'),
 ])
@@ -76,14 +78,5 @@ model.summary()
 
 # print(model.output_shape)
 # print(model.compute_output_signature)
-
-# inputs = tf.keras.Input(shape=(3,))
-# x = tf.keras.layers.Dense(4, activation=tf.nn.relu)(inputs)
-# outputs = tf.keras.layers.Dense(5, activation=tf.nn.softmax)(x)
-# model = tf.keras.Model(inputs=inputs, outputs=outputs)
-
-# Start with dense layer with sigmoid function
-# For compile model.compile
-# For fitting model: model.fit (needs inputs)
 
 
