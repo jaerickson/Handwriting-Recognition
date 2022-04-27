@@ -50,11 +50,14 @@ model = keras.models.Sequential([
     keras.layers.Conv2D(32, 12, activation='sigmoid', input_shape=(53, 358, 1)),
     keras.layers.MaxPooling2D(1),
     keras.layers.Flatten(input_shape=[53, 358]),
-    keras.Input(shape=(53, 358)),
+    #keras.Input(shape=(53, 358)),
     keras.layers.Dense(64, activation='sigmoid'),
+    #dense layer with one unit output
 ])
 model.compile(
     loss='sparse_categorical_crossentropy',
+    #loss='mean_squared_error'
+    #fashionmnist relu
     optimizer='adam',
     metrics='accuracy'
 )
