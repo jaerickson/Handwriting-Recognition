@@ -47,13 +47,11 @@ trainSetX, validationSetX, trainSetY, validationSetY = sk_model.train_test_split
 
 # Milestone 6 & 7
 model = keras.models.Sequential([
-    keras.layers.Conv2D(32, 11, activation='sigmoid', input_shape=(53, 358, 1)),
-    keras.layers.MaxPooling2D(1),
-    keras.layers.Conv2D(32, 11, activation='sigmoid', input_shape=(53, 358, 1)),
+    keras.layers.Conv2D(32, 12, activation='sigmoid', input_shape=(53, 358, 1)),
     keras.layers.MaxPooling2D(1),
     keras.layers.Flatten(input_shape=[53, 358]),
     keras.Input(shape=(53, 358)),
-    keras.layers.Dense(32, activation='sigmoid'),
+    keras.layers.Dense(64, activation='sigmoid'),
 ])
 model.compile(
     loss='sparse_categorical_crossentropy',
