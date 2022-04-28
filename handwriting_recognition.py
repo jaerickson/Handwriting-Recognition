@@ -45,19 +45,17 @@ trainSetX, testSetX, trainSetY, testSetY = sk_model.train_test_split(img_array, 
 trainSetX, validationSetX, trainSetY, validationSetY = sk_model.train_test_split(trainSetX, trainSetY,
                                                                                  test_size=0.2, train_size=0.8)
 
-# Milestone 6 & 7
+# Milestone 8 - formerly 6 & 7
 model = keras.models.Sequential([
-    keras.layers.Conv2D(32, 12, activation='sigmoid', input_shape=(53, 358, 1)),
+    keras.layers.Conv2D(32, 12, activation='relu', input_shape=(53, 358, 1)),
     keras.layers.MaxPooling2D(1),
     keras.layers.Flatten(input_shape=[53, 358]),
-    #keras.Input(shape=(53, 358)),
-    keras.layers.Dense(64, activation='sigmoid'),
-    #dense layer with one unit output
+    keras.Input(shape=(53, 358)),
+    keras.layers.Dense(64, activation='relu'),
+    keras.layers.Dense(2, activation='softmax')
 ])
 model.compile(
     loss='sparse_categorical_crossentropy',
-    #loss='mean_squared_error'
-    #fashionmnist relu
     optimizer='adam',
     metrics='accuracy'
 )
@@ -65,7 +63,8 @@ model.fit(
     x=trainSetX,
     y=trainSetY,
     epochs=10,
-    validation_data=(validationSetX, validationSetY)
+    validation_data=(validationSetX, validationSetY),
+    callbacks=keras.callbacks.ReduceLROnPlateau(monitor='accuracy', factor=0.2, patience=2)
 )
 model.summary()
 
