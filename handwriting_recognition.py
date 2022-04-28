@@ -57,7 +57,6 @@ def single_output_neuron(trainSetX, trainSetY, validationSetX, validationSetY):
     """
     model = keras.models.Sequential([
         keras.layers.Flatten(input_shape=[53, 358]),
-        keras.Input(shape=(53, 358)),
         keras.layers.Dense(64, activation='sigmoid'),
     ])
     model.compile(
@@ -91,14 +90,14 @@ def convolutional_neural_network(trainSetX, trainSetY, validationSetX, validatio
     """
     model = keras.models.Sequential([
         keras.layers.Conv2D(32, 12, activation='relu', input_shape=(53, 358, 1)),
+        keras.layers.Conv2D(32, 12, activation='relu', input_shape=(53, 358, 1)),
         keras.layers.MaxPooling2D(1),
         keras.layers.Flatten(input_shape=[53, 358]),
-        keras.Input(shape=(53, 358)),
         keras.layers.Dense(64, activation='relu'),
-        keras.layers.Dense(2, activation='softmax')
+        keras.layers.Dense(1, activation='sigmoid')
     ])
     model.compile(
-        loss='sparse_categorical_crossentropy',
+        loss='mean_squared_error',
         optimizer='adam',
         metrics='accuracy'
     )
@@ -117,17 +116,21 @@ def convolutional_neural_network(trainSetX, trainSetY, validationSetX, validatio
 
 
 def main():
-    # Milestone 1:
-    # Read answers.csv into a pandas dataframe. It should have a length of 47703.
+    """
+    Runs all functions
+    Milestones 1, 4, 5 out of functions
+    1: read answers into pandas dataframe
+    4: set aside 20% of data for testing
+    5: set aside 20% of remaining data for validation
+    """
     answers_raw_data = pd.read_csv('answers.csv', nrows=1000)
     answers_cleaned = clean_ans_data(answers_raw_data)
     img_array = img_to_arr(answers_cleaned)
-    # Milestone 4 & 5
     trainSetX, testSetX, trainSetY, testSetY = sk_model.train_test_split(img_array, answers_cleaned["raiford"],
                                                                          test_size=0.2, train_size=0.8)
     trainSetX, validationSetX, trainSetY, validationSetY = sk_model.train_test_split(trainSetX, trainSetY,
                                                                                      test_size=0.2, train_size=0.8)
-    # single_output_neuron(trainSetX, trainSetY, validationSetX, validationSetY)
+    # model = single_output_neuron(trainSetX, trainSetY, validationSetX, validationSetY)
     model = convolutional_neural_network(trainSetX, trainSetY, validationSetX, validationSetY)
     results = model.evaluate(testSetX, testSetY)
     print("test loss, test acc: ", results)
