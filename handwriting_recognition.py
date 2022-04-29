@@ -1,5 +1,5 @@
 from os.path import exists
-import keras as keras
+from tensorflow import keras
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -43,16 +43,16 @@ def img_to_arr(answers_cleaned):
     return img_array
 
 
-def single_output_neuron(trainSetX, trainSetY, validationSetX, validationSetY):
+def single_output_neuron(train_set_x, train_set_y, validation_set_x, validation_set_y):
     """
     Milestone 6 & 7
     Simple single output neuron with sigmoid activation.
     Compiles model and fits to data
     Accuracy usually around 67%
-    :param trainSetX: Ballot ID
-    :param trainSetY: 1 or 0
-    :param validationSetX: Ballot ID
-    :param validationSetY: 1 or 0
+    :param train_set_x: Ballot ID
+    :param train_set_y: 1 or 0
+    :param validation_set_x: Ballot ID
+    :param validation_set_y: 1 or 0
     :return: trained model
     """
     model = keras.models.Sequential([
@@ -65,16 +65,16 @@ def single_output_neuron(trainSetX, trainSetY, validationSetX, validationSetY):
         metrics='accuracy'
     )
     model.fit(
-        x=trainSetX,
-        y=trainSetY,
+        x=train_set_x,
+        y=train_set_y,
         epochs=10,
-        validation_data=(validationSetX, validationSetY),
+        validation_data=(validation_set_x, validation_set_y),
         callbacks=keras.callbacks.ReduceLROnPlateau(monitor='accuracy', factor=0.2, patience=1)
     )
     return model
 
 
-def convolutional_neural_network(trainSetX, trainSetY, validationSetX, validationSetY):
+def convolutional_neural_network(train_set_x, train_set_y, validation_set_x, validation_set_y):
     """
     Milestone 8 & 9
     More complicated convolutional neural network
@@ -82,31 +82,32 @@ def convolutional_neural_network(trainSetX, trainSetY, validationSetX, validatio
     Plots learning curve history
     Highest accuracy 97% plateaus after running too much data
         or running code several times in a row
-    :param trainSetX: Ballot ID
-    :param trainSetY: 1 or 0
-    :param validationSetX: Ballot ID
-    :param validationSetY: 1 or 0
+    :param train_set_x: Ballot ID
+    :param train_set_y: 1 or 0
+    :param validation_set_x: Ballot ID
+    :param validation_set_y: 1 or 0
     :return: trained model and model history
     """
     model = keras.models.Sequential([
-        keras.layers.Conv2D(32, 12, activation='relu', input_shape=(53, 358, 1)),
-        keras.layers.Conv2D(32, 12, activation='relu', input_shape=(53, 358, 1)),
+        keras.layers.Conv2D(32, 10, activation='relu', input_shape=(53, 358, 1)),
+        keras.layers.Conv2D(32, 5, activation='relu', input_shape=(53, 358, 1)),
+        keras.layers.Conv2D(32, 1, activation='relu', input_shape=(53, 358, 1)),
         keras.layers.MaxPooling2D(1),
         keras.layers.Flatten(input_shape=[53, 358]),
         keras.layers.Dense(64, activation='relu'),
-        keras.layers.Dense(1, activation='sigmoid')
+        keras.layers.Dense(2, activation='softmax')
     ])
     model.compile(
-        loss='mean_squared_error',
+        loss='sparse_categorical_crossentropy',
         optimizer='adam',
         metrics='accuracy'
     )
     history = model.fit(
-        x=trainSetX,
-        y=trainSetY,
+        x=train_set_x,
+        y=train_set_y,
         epochs=10,
-        validation_data=(validationSetX, validationSetY),
-        callbacks=keras.callbacks.ReduceLROnPlateau(monitor='accuracy', factor=0.2, patience=1)
+        validation_data=(validation_set_x, validation_set_y),
+        callbacks=keras.callbacks.ReduceLROnPlateau(monitor='accuracy', factor=0.7, patience=1)
     )
     pd.DataFrame(history.history).plot(figsize=(8, 5))
     plt.grid(True)
@@ -123,16 +124,18 @@ def main():
     4: set aside 20% of data for testing
     5: set aside 20% of remaining data for validation
     """
-    answers_raw_data = pd.read_csv('answers.csv', nrows=1000)
+    answers_raw_data = pd.read_csv('answers.csv', nrows=10000)
+    # answers_raw_data = pd.read_csv('answers.csv')
     answers_cleaned = clean_ans_data(answers_raw_data)
     img_array = img_to_arr(answers_cleaned)
-    trainSetX, testSetX, trainSetY, testSetY = sk_model.train_test_split(img_array, answers_cleaned["raiford"],
-                                                                         test_size=0.2, train_size=0.8)
-    trainSetX, validationSetX, trainSetY, validationSetY = sk_model.train_test_split(trainSetX, trainSetY,
-                                                                                     test_size=0.2, train_size=0.8)
-    # model = single_output_neuron(trainSetX, trainSetY, validationSetX, validationSetY)
-    model = convolutional_neural_network(trainSetX, trainSetY, validationSetX, validationSetY)
-    results = model.evaluate(testSetX, testSetY)
+    train_set_x, test_set_x, train_set_y, test_set_y = sk_model.train_test_split(img_array, answers_cleaned["raiford"],
+                                                                                 test_size=0.2, train_size=0.8)
+    test_set_x, validation_set_x, test_set_y, validation_set_y = sk_model.train_test_split(train_set_x, train_set_y,
+                                                                                           test_size=0.2,
+                                                                                           train_size=0.8)
+    # model = single_output_neuron(train_set_x, train_set_y, validation_set_x, validation_set_y)
+    model = convolutional_neural_network(train_set_x, train_set_y, validation_set_x, validation_set_y)
+    results = model.evaluate(test_set_x, test_set_y)
     print("test loss, test acc: ", results)
 
 
